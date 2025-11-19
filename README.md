@@ -217,3 +217,24 @@ let
 
 in
     #"Added Proportion"
+
+
+
+
+    //table
+
+    Sum of Proportion	Column Labels								
+Row Labels	1	2	3	4	5	6	7	8	Grand Total
+Ardrossan	135	38	33	20	8	2	1	0	238
+Arran	110	19	17	6	1	1	1		155
+Beith	43	10	19	5	2	0	0		79
+Cumbrae	17	4	0	0	0		0		21
+Dalry	61	12	13	6	2	1	0		95
+Irvine	785	195	213	115	42	9	7	1	1366
+Kilbirnie	80	21	18	11	5	4	1		140
+Kilwinning	272	68	69	47	14	5	2		477
+Largs	176	36	58	20	8	0	1		299
+Outwith North Ayrshire	0								0
+Saltcoats	164	45	34	23	13	2	1	0	283
+Stevenston	122	32	23	16	7	1	1	1	202
+Grand Total	1966	479	497	269	102	27	13	2	3355
