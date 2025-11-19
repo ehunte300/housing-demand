@@ -238,3 +238,109 @@ Outwith North Ayrshire	0								0
 Saltcoats	164	45	34	23	13	2	1	0	283
 Stevenston	122	32	23	16	7	1	1	1	202
 Grand Total	1966	479	497	269	102	27	13	2	3355
+
+
+
+//instuctions 
+Step	Detail
+1	Created copy of original data
+2	Added proportion column to data, column AY = 1/Number of Areas of Preference (Column E)
+3	Filter Column AM by Band 1 and give all Homeless applicants -5 points in points override field (Column B)
+4	Add locality information filter column M and use values in table opposite to populate Locality column AZ
+5	Created pivot table 'Proportionate Pivot'
+
+
+in the proportionate pivot is 
+filters: points override, bandID, property adaptations (i've implemented these as a slicer)
+columns - strategic bedroom need
+rows - locality 
+values - sum of proportion 
+
+Step	Detail
+1	Created copy of original data
+2	Removed duplicates using Housing Register Reference Number (column AU)
+3	Filter Column AM by Band 1 and give all Homeless applicants -5 points in points override field (Column B)
+4	Add current region (column AZ) - region applicant currently resides within
+5	Filter data by post code (see list in columns D&E) and sense check locality information, errors / queries highlighted
+6	Review postcodes not known and those issued in error etc, sense check heading filter lists
+7	Add current locality (Column BA) - using information in table 2 opposite
+8	Create pivot table 'AD Pivot'
+
+ad pivot is 
+filters: points override, bandID, property adaptations (i've implemented these as a slicer)
+columns - strategic bedroom need
+rows - current locality 
+values - sum of proportion 
+
+
+Table 1: Current region from applicants current Post Codes				
+Locality	Post Codes			
+Ardrossan	KA22			
+Arran	KA27			
+Beith	KA15			
+Cumbrae	KA28			
+Dalry	KA24			
+Irvine	KA11 & KA12			
+Kilbirnie	KA25 & KA14 Longbar & Glengarnock			
+Kilwinning	KA13			
+Largs	KA30 & KA29 (Fairlie) & PA17 (Skelmorlie) & KA23 (West Kilbride)			
+Outwith North Ayrshire	All others			
+Saltcoats	KA21			
+Stevenston	KA20			
+				
+Table 2: Locality from applicants Current Region				
+Locality	Region			
+Arran	Arran			
+Cumbrae	Cumbrae			
+Garnock Valley	Beith			
+	Dalry			
+	Kilbirnie			
+Irvine	Irvine			
+Kilwinning	Kilwinning			
+North Coast	Largs			
+Three Towns	Ardrossan			
+	Saltcoats			
+	Stevenston			
+Z - Outwith NA	Outwith North Ayrshire			
+				
+				
+				
+				
+	KA22	Ardrossan		
+	KA27	Arran		
+	KA15	Beith		
+	KA28	Cumbrae		
+	KA24	Dalry		
+	KA11	Irvine		
+	KA12	Irvine		
+	KA14	Kilbirnie		
+	KA25	Kilbirnie		
+	KA13	Kilwinning		
+	KA29	Largs		
+	KA23	Largs		
+	PA17	Largs		
+	KA21	Saltcoats		
+	KA20	Stevenston		
+				
+				
+Client Region	Post Code		Locality	Region
+Ardrossan	KA22		ARRAN	ARRAN
+Arran	KA27		CUMBRAE	CUMBRAE
+Beith	KA15		GARNOCK VALLEY	BEITH
+Cumbrae	KA28		GARNOCK VALLEY	DALRY
+Dalry	KA24		GARNOCK VALLEY	KILBIRNIE
+Irvine	KA11		IRVINE	IRVINE
+Irvine	KA12		KILWINNING	KILWINNING
+Kilbirnie	KA14		NORTH COAST	LARGS
+Kilbirnie	KA25		THREE TOWNS	ARDROSSAN
+Kilwinning	KA13		THREE TOWNS	SALTCOATS
+Largs	KA29		THREE TOWNS	STEVENSTON
+Largs	KA30		Z - OUTWITH NA	OUTWITH NORTH AYRSHIRE
+Largs	KA23			
+Largs	PA17			
+Outwith North Ayrshire	All others			
+
+
+
+
+
