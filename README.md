@@ -130,5 +130,18 @@ in
         then 1 / [Number of areas of preference] 
         else null
     )
+
+
+
+
+
+    //AOP proportion
+
+    #"Added Proportion" = Table.AddColumn(#"Previous Step", "Proportion", each 
+    if [Number of areas of preference] <> null and [Number of areas of preference] > 0 
+    then 1 / [Number of areas of preference] 
+    else null
+)
+
 in
     #"Added Proportion"
