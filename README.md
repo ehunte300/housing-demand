@@ -340,9 +340,6 @@ Largs	KA23
 Largs	PA17			
 Outwith North Ayrshire	All others			
 
-
-pyhton script
-
 import pandas as pd
 import numpy as np
 import re
@@ -429,7 +426,95 @@ if 'Number of areas of preference' not in df.columns or df['Number of areas of p
     df.drop(columns=['__AOP_clean', 'Computed_NumAOPs'], inplace=True, errors='ignore')
 else:
     # ensure integer type
-    df['Number of areas of preference'] = pd.to_numeric(df[']()_
+    df['Number of areas of preference'] = pd.to_numeric(df['Number of areas of preference'], errors='coerce').fillna(0).astype(int)
 
+# --- Proportion: 1 / Number of areas (guard against zero) -------------------
+def calc_prop(n):
+    try:
+        n = int(n)
+        if n <= 0:
+            return np.nan
+        return 1.0 / n
+    except:
+        return np.nan
 
+df['Proportion'] = df['Number of areas of preference'].apply(calc_prop)
+
+# --- Build the exploded AOP table (df_aop) ----------------------------------
+# We assume df is already the exploded AOP dataset (one row per AOP). If not, 
+# additional splitting logic would be needed.
+df_aop = df.copy()
+
+# Add final locality/region fields (from postcode mapping or existing columns)
+# If there is already a 'Locality' column in your data, prefer it; otherwise use mapped.
+if 'Locality' in df_aop.columns:
+    df_aop['FinalLocality'] = df_aop['Locality'].fillna(df_aop['MappedLocality'])
+else:
+    df_aop['FinalLocality'] = df_aop['MappedLocality']
+
+if 'Region' in df_aop.columns:
+    df_aop['FinalRegion'] = df_aop['Region'].fillna(df_aop['MappedRegion'])
+else:
+    df_aop['FinalRegion'] = df_aop['MappedRegion']
+
+# Some housekeeping columns to keep (you can edit as needed)
+keep_cols_aop = [
+    'HousingRegisterRef', 'Area of preference', 'Number of areas of preference', 'Proportion',
+    'Correspondence PostCode', '__PostcodePrefix', 'FinalLocality', 'FinalRegion'
+]
+# include any columns from original that you want to pass through
+extra_cols = [c for c in df_aop.columns if c not in keep_cols_aop]
+# reorder but ensure final cols exist
+cols_present = [c for c in keep_cols_aop if c in df_aop.columns] + extra_cols
+df_aop = df_aop[cols_present].copy()
+
+# --- Build the deduplicated AD table (df_ad) --------------------------------
+# Use the first row per HousingRegisterRef by default (you can change keep='first' to criteria-based)
+df_ad = df.sort_values(by=['HousingRegisterRef']).drop_duplicates(subset=['HousingRegisterRef'], keep='first').copy()
+
+# Add same FinalLocality/FinalRegion to df_ad
+if 'Locality' in df_ad.columns:
+    df_ad['FinalLocality'] = df_ad['Locality'].fillna(df_ad['MappedLocality'])
+else:
+    df_ad['FinalLocality'] = df_ad['MappedLocality']
+
+if 'Region' in df_ad.columns:
+    df_ad['FinalRegion'] = df_ad['Region'].fillna(df_ad['MappedRegion'])
+else:
+    df_ad['FinalRegion'] = df_ad['MappedRegion']
+
+# Ensure Proportion exists on df_ad: for deduped table you might want the sum of proportions per applicant (should be 1)
+# But typically you want a single applicant-level Proportion field = 1 (if needed) or keep the computed numerator.
+# We'll add Applicant_NumAOP and Applicant_Proportion for clarity:
+app_numaop = df.groupby('HousingRegisterRef')['Proportion'].count().rename('Applicant_NumAOP')
+df_ad = df_ad.merge(app_numaop, left_on='HousingRegisterRef', right_index=True, how='left')
+# Applicant_Proportion = sum of per-AOP proportions for this applicant (should be ~1)
+app_prop_sum = df.groupby('HousingRegisterRef')['Proportion'].sum().rename('Applicant_Proportion_Sum')
+df_ad = df_ad.merge(app_prop_sum, left_on='HousingRegisterRef', right_index=True, how='left')
+
+# If there's a Points Override logic you wanted for Band 1 homeless: try to apply if columns exist
+if 'BandID' in df_ad.columns and 'Points Override' in df_ad.columns:
+    # attempt to detect a homeless indicator column; try several common names
+    homeless_cols = [c for c in df_ad.columns if 'homeless' in c.lower() or 'homeless' in str(c).lower()]
+    if homeless_cols:
+        homeless_col = homeless_cols[0]
+        df_ad.loc[(df_ad['BandID'] == 'Band 1') & (df_ad[homeless_col].astype(str).str.lower().isin(['yes','true','1'])), 'Points Override'] = -5
+        df_ad['Applied_Homeless_Band1_Override'] = df_ad[homeless_col].astype(str).str.lower().isin(['yes','true','1'])
+    else:
+        df_ad['Applied_Homeless_Band1_Override'] = False
+else:
+    # Add column to show not applied
+    df_ad['Applied_Homeless_Band1_Override'] = False
+
+# --- Final cleanup and messages ---------------------------------------------
+# Add a small audit column so you can see script ran and mapping coverage
+df_aop['__MappedFromPrefix'] = np.where(df_aop['__PostcodePrefix'].isin(postcode_to_locality_region.keys()), True, False)
+df_ad['__MappedFromPrefix'] = np.where(df_ad['__PostcodePrefix'].isin(postcode_to_locality_region.keys()), True, False)
+
+# Replace empty strings with NaN for cleanliness
+df_aop.replace('', np.nan, inplace=True)
+df_ad.replace('', np.nan, inplace=True)
+
+# Output DataFrames for Power BI: df_aop (exploded/proportionate) and df_ad (deduped applicants)
+# Power BI will pick these up.
 
