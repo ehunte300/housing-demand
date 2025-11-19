@@ -341,6 +341,95 @@ Largs	PA17
 Outwith North Ayrshire	All others			
 
 
+pyhton script
+
+import pandas as pd
+import numpy as np
+import re
+
+# Power BI provides the incoming table as 'dataset' - copy it to df
+df = dataset.copy()
+
+# --- Safety checks ---------------------------------------------------------
+required_cols = ['Area of preference', 'Number of areas of preference', 'Correspondence PostCode', 'HousingRegisterRef']
+missing = [c for c in required_cols if c not in df.columns]
+if missing:
+    # If Number of areas is missing that's okay (we can compute it). Otherwise error message in outputs.
+    pass
+
+# --- Helper: clean postcode and build prefix --------------------------------
+def clean_postcode(pc):
+    if pd.isna(pc):
+        return ''
+    s = str(pc).upper()
+    # keep alnum and spaces, then remove spaces
+    s = re.sub(r'[^A-Z0-9]', '', s)
+    # take first 4 characters as prefix (similar to your Power Query behaviour)
+    return s[:4]
+
+df['__PostcodePrefix'] = df['Correspondence PostCode'].apply(clean_postcode)
+
+# --- Postcode prefix -> Locality & Region mapping (from your tables) -------
+# Mapping built from the mapping tables you supplied. Add or edit as necessary.
+postcode_to_locality_region = {
+    # Table 1 / list mapping (prefix: (Locality, Region))
+    'KA22': ('Ardrossan', 'Ardrossan'),
+    'KA27': ('Arran', 'Arran'),
+    'KA15': ('Beith', 'Beith'),
+    'KA28': ('Cumbrae', 'Cumbrae'),
+    'KA24': ('Dalry', 'Dalry'),
+    'KA11': ('Irvine', 'Irvine'),
+    'KA12': ('Irvine', 'Irvine'),
+    'KA14': ('Kilbirnie', 'Kilbirnie'),
+    'KA25': ('Kilbirnie', 'Kilbirnie'),
+    'KA13': ('Kilwinning', 'Kilwinning'),
+    'KA29': ('Largs', 'Largs'),
+    'KA30': ('Largs', 'Largs'),
+    'KA23': ('Largs', 'Largs'),
+    'PA17': ('Largs', 'Largs'),
+    'KA21': ('Saltcoats', 'Saltcoats'),
+    'KA20': ('Stevenston', 'Stevenston'),
+    # If you need more prefixes, add here. All others -> Outwith North Ayrshire
+}
+
+# Map prefixes
+def map_prefix(pfx):
+    if not pfx:
+        return ('', '')
+    if pfx in postcode_to_locality_region:
+        return postcode_to_locality_region[pfx]
+    # Some prefixes may be shorter/longer, try first 3 chars fallback
+    short = pfx[:3]
+    if short in postcode_to_locality_region:
+        return postcode_to_locality_region[short]
+    return ('Outwith North Ayrshire', 'Outwith North Ayrshire')
+
+mapped = df['__PostcodePrefix'].apply(lambda x: map_prefix(x))
+df[['MappedLocality', 'MappedRegion']] = pd.DataFrame(mapped.tolist(), index=df.index)
+
+# --- Ensure Number of areas exists: compute if blank or zero ----------------
+# If 'Number of areas of preference' is missing or has invalid values, compute from AOP grouping
+if 'Number of areas of preference' not in df.columns or df['Number of areas of preference'].isnull().any():
+    # Count non-empty distinct or non-null AOPs per applicant
+    # Use the raw Area of preference values, trim them
+    df['__AOP_clean'] = df['Area of preference'].astype(str).str.strip()
+    # treat empty strings and literal 'nan' as missing
+    df.loc[df['__AOP_clean'].isin(['', 'nan', 'None', 'NoneType']), '__AOP_clean'] = np.nan
+    numaops = df.groupby('HousingRegisterRef')['__AOP_clean'].nunique(dropna=True).rename('Computed_NumAOPs')
+    df = df.merge(numaops, left_on='HousingRegisterRef', right_index=True, how='left')
+    # where original col exists and is valid use it, otherwise use computed
+    if 'Number of areas of preference' in df.columns:
+        df['Number of areas of preference'] = df['Number of areas of preference'].where(
+            pd.notnull(df['Number of areas of preference']) & (df['Number of areas of preference'] > 0),
+            df['Computed_NumAOPs']
+        ).fillna(0).astype(int)
+    else:
+        df['Number of areas of preference'] = df['Computed_NumAOPs'].fillna(0).astype(int)
+    # drop helper
+    df.drop(columns=['__AOP_clean', 'Computed_NumAOPs'], inplace=True, errors='ignore')
+else:
+    # ensure integer type
+    df['Number of areas of preference'] = pd.to_numeric(df[']()_
 
 
 
