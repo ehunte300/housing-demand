@@ -132,16 +132,88 @@ in
     )
 
 
+//AOP_VALUES_UPDATED
+let
+    // Load AOP expanded data from CSV
+    Source = Csv.Document(
+        File.Contents("C:\Users\emmahunter\Desktop\6a719b4e-2cd3-46a3-bd39-ba7a923a2986.csv"),
+        [Delimiter=",", Columns=60, Encoding=1252, QuoteStyle=QuoteStyle.None]
+    ),
 
+    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
 
+    // Change column types
+    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{
+        {"Registration date", type date}, 
+        {"Date form received from applicant", type date}, 
+        {"Received Date", type date}, 
+        {"HousingRegisterRef", type text}, 
+        {"Name", type text}, 
+        {"Date Of Birth", type date}, 
+        {"Age of household member Group", type text}, 
+        {"Age of household member", Int64.Type}, 
+        {"Correspondence Address1", type text}, 
+        {"Correspondence Address2", type text}, 
+        {"Correspondence Address3", type text}, 
+        {"Correspondence Address4", type text}, 
+        {"Correspondence Address5", type text}, 
+        {"Correspondence PostCode", type text}, 
+        {"Current Property Type", type text}, 
+        {"Tenancy Type", type text}, 
+        {"Household type", type text}, 
+        {"Current Tenure Type", type text}, 
+        {"Current Address 1", type text}, 
+        {"Current Address 2", type text}, 
+        {"Current Address 3", type text}, 
+        {"Current Address 4", type text}, 
+        {"Current Address 5", type text}, 
+        {"Current Postcode", type text}, 
+        {"Region", type text}, 
+        {"Number of people being rehoused", Int64.Type}, 
+        {"BandID", type text}, 
+        {"Strategic Bedroom Need", Int64.Type}, 
+        {"Points", Int64.Type}, 
+        {"Points Override", Int64.Type}, 
+        {"Points Calculated", Int64.Type}, 
+        {"Area of preference", type text}, 
+        {"Number of areas of preference", Int64.Type}, 
+        {"Does this applicant require a significantly adapted property as recommended by the OT?", type text}, 
+        {"Do you want or need any of the following types of accommodation? Housing with access for wheelchairs", type text}, 
+        {"Do you want or need any of the following types of accommodation? Sheltered housing", type text}, 
+        {"Do you want or need any of the following types of accommodation? Amenity Housing", type text}, 
+        {"Type of property Maisonette (upper floor)", type text}, 
+        {"Type of property Tenement (ground floor)", type text}, 
+        {"Type of property Four in a block (upper floor)", type text}, 
+        {"Type of property Maisonette (ground floor)", type text}, 
+        {"Type of property Three-storey end-terrace", type text}, 
+        {"Type of property Hostel", type text}, 
+        {"Type of property Tenement (upper floor)", type text}, 
+        {"Type of property Basement flat", type text}, 
+        {"Type of property Three-storey mid-terrace", type text}, 
+        {"Type of property Semi-detached house", type text}, 
+        {"Type of property Mid-terrace house", type text}, 
+        {"Type of property End-terrace house", type text}, 
+        {"Type of property Multi-storey flat", type text}, 
+        {"Type of property Four in a block (ground floor)", type text}, 
+        {"Type of property Detached house", type text}, 
+        {"Type of property Bungalow", type text}, 
+        {"Size of property Three bedrooms", type text}, 
+        {"Size of property Four bedrooms", type text}, 
+        {"Size of property Five or more bedrooms", type text}, 
+        {"Size of property Bedsit (no bedrooms)", type text}, 
+        {"Size of property One bedroom", type text}, 
+        {"Size of property Two bedrooms", type text},
+        {"", type text}
+    }),
 
-    //AOP proportion
-
-    #"Added Proportion" = Table.AddColumn(#"Previous Step", "Proportion", each 
-    if [Number of areas of preference] <> null and [Number of areas of preference] > 0 
-    then 1 / [Number of areas of preference] 
-    else null
-)
+    // Add weighted proportion column → key part for proportionate demand
+    #"Added Proportion" = Table.AddColumn(#"Changed Type", "Proportion", each 
+        if [Number of areas of preference] <> null 
+            and [Number of areas of preference] > 0 
+        then 1 / [Number of areas of preference] 
+        else null,
+        type number
+    )
 
 in
     #"Added Proportion"
