@@ -1,0 +1,23 @@
+Client Region to Postcode = 
+DATATABLE(
+    "Post Code", STRING,
+    "Client Region", STRING,
+    {
+        {"KA22", "ARDROSSAN"},
+        {"KA27", "ARRAN"},
+        {"KA15", "BEITH"},
+        {"KA28", "CUMBRAE"},
+        {"KA24", "DALRY"},
+        {"KA11", "IRVINE"},
+        {"KA12", "IRVINE"},
+        {"KA14", "KILBIRNIE"},
+        {"KA25", "KILBIRNIE"},
+        {"KA13", "KILWINNING"},
+        {"KA29", "LARGS"},
+        {"KA30", "LARGS"},
+        {"KA23", "LARGS"},
+        {"PA17", "LARGS"},
+        {"KA21", "SALTCOATS"},
+        {"KA20", "STEVENSTON"}
+    }
+)
