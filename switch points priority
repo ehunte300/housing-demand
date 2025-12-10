@@ -1,0 +1,11 @@
+// switch code for points priority
+
+Points Priority1 = 
+SWITCH(
+    TRUE(),
+    'Demand Export'[Points Override] >= 80, "High (80+ Points)",
+    'Demand Export'[Points Override] >= 50, "Medium (50 - 80 Points)",
+    'Demand Export'[Points Override] < 50, "Low (Less than 50)",
+    "None"
+)
+//to be updated - priority banding measure
