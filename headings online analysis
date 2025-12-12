@@ -12,3 +12,14 @@ IF(
     DATEDIFF(StartDate, TODAY(), DAY),
     0
 )
+
+
+Application wait days = 
+SWITCH(
+    TRUE(),
+    'NAHR Group Analysis'[Days Active] <= 30, "0–30 days",
+    'NAHR Group Analysis'[Days Active] <= 60, "31–60 days",
+    'NAHR Group Analysis'[Days Active] <= 90, "61–90 days",
+    "90+ days"
+)
+//group applications on days waiting
