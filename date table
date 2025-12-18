@@ -10,3 +10,23 @@ ADDCOLUMNS (
     "Month-Year", FORMAT([Date], "MMM-YYYY"),
     "Quarter", "Q" & FORMAT([Date], "Q")
 )
+
+
+update
+
+DateTable = 
+VAR StartDate = DATE(YEAR(TODAY()) - 3, 1, 1)
+VAR EndDate   = DATE(YEAR(TODAY()) + 2, 12, 31)
+RETURN
+ADDCOLUMNS (
+    CALENDAR ( StartDate, EndDate ),
+    "Year", YEAR([Date]),
+    "Month Number", MONTH([Date]),
+    "Month Name", FORMAT([Date], "MMMM"),
+    "Month-Year", FORMAT([Date], "MMM-YYYY"),
+    "Quarter", "Q" & FORMAT([Date], "Q"),
+    "Fiscal Year",
+        VAR M = MONTH([Date])
+        VAR Y = YEAR([Date])
+        RETURN IF(M >= 4, Y & "/" & Y + 1, Y - 1 & "/" & Y)
+)
