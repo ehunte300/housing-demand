@@ -60,3 +60,18 @@ RETURN
 IF ( M >= 4, M - 3, M + 9 )
 
 
+Fiscal Year Month Sort =
+VAR FY =
+    IF (
+        MONTH ( DateTable[Date] ) >= 4,
+        YEAR ( DateTable[Date] ),
+        YEAR ( DateTable[Date] ) - 1
+    )
+VAR FM =
+    IF (
+        MONTH ( DateTable[Date] ) >= 4,
+        MONTH ( DateTable[Date] ) - 3,
+        MONTH ( DateTable[Date] ) + 9
+    )
+RETURN
+FY * 100 + FM
