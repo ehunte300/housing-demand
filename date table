@@ -30,3 +30,14 @@ ADDCOLUMNS (
         VAR Y = YEAR([Date])
         RETURN IF(M >= 4, Y & "/" & Y + 1, Y - 1 & "/" & Y)
 )
+
+
+Lets Completed (Current FY ONLY) = 
+VAR CurrentFY = [Current Financial Year]
+RETURN
+CALCULATE(
+    COUNTROWS('Lets'),
+    USERELATIONSHIP('DateTable'[Date], 'Lets'[Date Accepted (Date Only)]),
+    FILTER('Lets', NOT ISBLANK('Lets'[Date Accepted])),
+    FILTER('DateTable', 'DateTable'[Fiscal Year] = CurrentFY)
+)
