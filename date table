@@ -54,3 +54,9 @@ CALCULATE(
     'DateTable'[Fiscal Year] = CurrentFY
 )
 
+Fiscal Month Number =
+VAR M = MONTH ( DateTable[Date] )
+RETURN
+IF ( M >= 4, M - 3, M + 9 )
+
+
