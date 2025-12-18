@@ -41,3 +41,16 @@ CALCULATE(
     FILTER('Lets', NOT ISBLANK('Lets'[Date Accepted])),
     FILTER('DateTable', 'DateTable'[Fiscal Year] = CurrentFY)
 )
+
+fixed 
+
+Lets Completed (Current FY) :=
+VAR CurrentFY = [Current Financial Year]
+RETURN
+CALCULATE(
+    COUNTROWS(Lets),
+    USERELATIONSHIP('DateTable'[Date], Lets[Date Accepted (Date Only)]),
+    NOT ISBLANK(Lets[Date Accepted]),
+    'DateTable'[Fiscal Year] = CurrentFY
+)
+
