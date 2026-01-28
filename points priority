@@ -17,3 +17,18 @@ SWITCH(
     'Demand Export'[Points Override] >= 90, "Medium (90 - 289 Points)",
     'Demand Export'[Points Override] < 90, "Low (Less than 90)"
 )
+
+
+
+Points Priority1 =
+VAR P = 'Demand Export'[Points Override]
+VAR Label =
+    SWITCH(
+        TRUE(),
+        ISBLANK(P), "None",
+        P >= 290, "High (290+ Points)",
+        P >= 90,  "Medium (90 - 289 Points)",
+        P < 90,   "Low (Less than 90)"
+    )
+RETURN
+TRIM(Label)
