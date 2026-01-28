@@ -1,0 +1,37 @@
+Voids to Demand Ratio = 
+DIVIDE([Confirmed Voids1], [Total Demand], 0)
+
+Confirmed Voids1 = 
+CALCULATE(
+    COUNTROWS('Voids at Year End'),
+    FILTER(
+        'Voids at Year End',
+        'Voids at Year End'[Void Status] = "Void Confirmed" &&
+        ISBLANK('Voids at Year End'[Void End Date])
+    ),
+    TREATAS(
+        VALUES('BedroomSizes disconnected table'[No of Bedrooms]),
+        'Voids at Year End'[No of Bedrooms]
+    )
+)
+
+
+Applicants per Void Text = 
+"1:" & FORMAT([Applicants per Void], "0.0")
+
+Applicants per Void = 
+DIVIDE([Total Demand], [Confirmed Voids1], 0)
+
+//amount of applicants applying based on confirmed void stock
+
+BedroomSizes disconnected table = 
+DATATABLE(
+    "No of Bedrooms", INTEGER,
+    {
+        {0},
+        {1},
+        {2},
+        {3},
+        {4}
+    }
+)
