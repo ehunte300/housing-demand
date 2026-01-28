@@ -6,3 +6,14 @@ SWITCH(
     'Demand Export'[Points Override] < 90, "Low (Less than 90)",
     "None"
 )
+
+
+
+Points Priority1 =
+SWITCH(
+    TRUE(),
+    ISBLANK('Demand Export'[Points Override]), "None",
+    'Demand Export'[Points Override] >= 290, "High (290+ Points)",
+    'Demand Export'[Points Override] >= 90, "Medium (90 - 289 Points)",
+    'Demand Export'[Points Override] < 90, "Low (Less than 90)"
+)
