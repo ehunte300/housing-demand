@@ -44,3 +44,15 @@ SWITCH(
     P >= 90,  "Medium (90 - 289 Points)",
     P > 0 && P < 90, "Low (Less than 90)"
 )
+
+
+Points Priority1 =
+VAR P = 'Demand Export'[Effective Points Override]
+RETURN
+SWITCH(
+    TRUE(),
+    P >= 290, "High (290+ Points)",
+    P >= 90,  "Medium (90 - 289 Points)",
+    "Low (Less than 90)"
+)
+
